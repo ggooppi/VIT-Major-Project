@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent" android:layout_margin="20dp" android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@color/colorPrimary">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/user_image_blog"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignBottom="@+id/userLastseen"
+                android:layout_alignParentEnd="true"
+                android:paddingBottom="5dp"
+                android:paddingTop="5dp"
+                android:src="@drawable/if_user_925901" />
+
+            <TextView
+                android:id="@+id/uname"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="10dp"
+                android:paddingLeft="5dp"
+                android:paddingTop="10dp"
+                android:text="GOpi"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:textStyle="normal|bold" />
+
+        </LinearLayout>
+
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/post_Img"
+            android:contentDescription=""
+            tools:ignore="ContentDescription"
+            android:adjustViewBounds="true"
+            android:scaleType="centerCrop" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/post_Title"
+            android:padding="15dp"
+            android:textStyle="normal|bold"
+            android:textAllCaps="true"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/post_Desc"
+            android:paddingLeft="15dp"
+            android:paddingBottom="15dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_weight="100">
+
+            <MultiAutoCompleteTextView
+                android:id="@+id/comment"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginEnd="15dp"
+                android:layout_marginStart="15dp"
+                android:background="@drawable/text_round"
+                android:hint="What you think about this..?"
+                android:inputType="textCapSentences"
+                android:paddingStart="15dp"
+                android:layout_weight="70"
+                android:imeOptions="actionDone"
+                android:textSize="14sp" />
+
+            <ImageView
+                android:id="@+id/sendComment"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:src="@mipmap/ic_send_black_24dp"
+                android:paddingEnd="10dp"
+                />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/showComments"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingBottom="5dp"
+            android:text="Click to view comments"
+            android:textColor="@color/colorPrimaryDark"
+            android:textStyle="bold|italic"
+            android:visibility="gone" />
+
+
+
+
+    </LinearLayout>
+</android.support.v7.widget.CardView>

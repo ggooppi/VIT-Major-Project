@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Work</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_map_tracking">Map</string>
+    <string name="home">Home</string>
+    <string name="chat">Chat And Track</string>
+    <string name="settings">Settings</string>
+</resources>
