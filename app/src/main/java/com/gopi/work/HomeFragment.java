@@ -99,7 +99,6 @@ public class HomeFragment extends Fragment {
                 viewHolder.setTitle(model.getTitle());
                 viewHolder.setDesc(model.getDesc());
                 viewHolder.setImage(getContext(), model.getImage());
-                viewHolder.showDelete(model.getUserId(),post_key);
                 databaseReference.child(post_key).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -128,6 +127,8 @@ public class HomeFragment extends Fragment {
 
                     }
                 });
+
+                viewHolder.showDelete(model.getUserId(),post_key);
 
             }
         };

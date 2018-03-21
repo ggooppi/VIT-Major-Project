@@ -19,6 +19,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -102,6 +105,8 @@ public class BottomViewForComments {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         String name = dataSnapshot.child(model.getUser_id()).child("name").getValue().toString();
                         viewHolder.setName(name);
+                        String thumb_image = dataSnapshot.child(model.getUser_id()).child("thumb_image").getValue().toString();
+                        viewHolder.setImage(context,thumb_image);
                     }
 
                     @Override
@@ -144,5 +149,24 @@ public class BottomViewForComments {
             uComment.setText(comment + ".");
         }
 
+        public void setImage(final Context context, final String thumb_image) {
+
+            final ImageView userImage = (ImageView) view.findViewById(R.id.user_image_comment);
+
+            Picasso.with(context).load(thumb_image).networkPolicy(NetworkPolicy.OFFLINE)
+                    .placeholder(R.drawable.if_user_925901).into(userImage, new Callback() {
+                @Override
+                public void onSuccess() {
+
+                }
+
+                @Override
+                public void onError() {
+
+                    Picasso.with(context).load(thumb_image).placeholder(R.drawable.if_user_925901).into(userImage);
+
+                }
+            });
+        }
     }
 }
