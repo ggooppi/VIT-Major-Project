@@ -99,6 +99,7 @@ public class HomeFragment extends Fragment {
                 viewHolder.setTitle(model.getTitle());
                 viewHolder.setDesc(model.getDesc());
                 viewHolder.setImage(getContext(), model.getImage());
+                viewHolder.showDelete(model.getUserId(),post_key);
                 databaseReference.child(post_key).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -125,18 +126,6 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
 
-                    }
-                });
-
-
-
-                viewHolder.view.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-
-                        Intent singleBlog = new Intent(getContext(),SingleBlog.class);
-                        singleBlog.putExtra("blog_id",post_key);
-                        startActivity(singleBlog);
                     }
                 });
 
@@ -258,6 +247,22 @@ public class HomeFragment extends Fragment {
                     }
                 }
             });
+        }
+
+        public void showDelete(String userId, final String post_key) {
+
+            if(FirebaseAuth.getInstance().getCurrentUser().getUid().equals(userId)){
+                ImageView delete = (ImageView) view.findViewById(R.id.deleteBlog);
+                delete.setVisibility(View.VISIBLE);
+
+                delete.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        DatabaseReference mDatabaseReference = FirebaseDatabase.getInstance().getReference().child("Blog");
+                        mDatabaseReference.child(post_key).removeValue();
+                    }
+                });
+            }
         }
     }
 }

@@ -135,13 +135,13 @@ public class BottomViewForComments {
 
         public void setName(String name) {
             TextView uName = (TextView) view.findViewById(R.id.userName);
-            uName.setText(name);
+            uName.setText(name + " : ");
         }
 
         public void setComment(String comment) {
 
             TextView uComment = (TextView) view.findViewById(R.id.userComment);
-            uComment.setText(comment);
+            uComment.setText(comment + ".");
         }
 
     }

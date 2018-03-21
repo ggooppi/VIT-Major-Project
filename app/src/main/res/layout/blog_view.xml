@@ -12,7 +12,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:background="@color/colorPrimary">
+            android:background="@color/colorPrimary"
+            android:layout_weight="100">
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/user_image_blog"
@@ -26,7 +27,7 @@
 
             <TextView
                 android:id="@+id/uname"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingBottom="10dp"
                 android:paddingLeft="5dp"
@@ -34,7 +35,18 @@
                 android:text="GOpi"
                 android:textColor="@color/black"
                 android:textSize="14sp"
-                android:textStyle="normal|bold" />
+                android:textStyle="normal|bold"
+                android:layout_weight="80"/>
+
+            <ImageView
+                android:id="@+id/deleteBlog"
+                android:layout_width="30dp"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="5dp"
+                android:layout_weight="10"
+                android:paddingTop="5dp"
+                android:src="@mipmap/ic_delete_black_24dp"
+                android:visibility="gone" />
 
         </LinearLayout>
 
