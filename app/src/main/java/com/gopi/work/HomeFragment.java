@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -42,6 +43,9 @@ public class HomeFragment extends Fragment {
 
     private DatabaseReference databaseReference;
     private DatabaseReference databaseusers;
+    private DatabaseReference databaseFriends;
+
+    private FirebaseAuth mAuth;
 
     private FloatingActionButton floatingActionButton;
 
@@ -63,10 +67,13 @@ public class HomeFragment extends Fragment {
         mLayoutManager = new LinearLayoutManager(getContext());
         mLayoutManager.setReverseLayout(true);
         mLayoutManager.setStackFromEnd(true);
+        mAuth = FirebaseAuth.getInstance();
         databaseReference = FirebaseDatabase.getInstance().getReference().child("Blog");
         databaseReference.keepSynced(true);
         databaseusers = FirebaseDatabase.getInstance().getReference().child("User");
         databaseusers.keepSynced(true);
+        databaseFriends = FirebaseDatabase.getInstance().getReference().child("Friends");
+        databaseFriends.keepSynced(true);
         mBloglist.setLayoutManager(new LinearLayoutManager(getContext()));
 
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
@@ -92,17 +99,52 @@ public class HomeFragment extends Fragment {
                 databaseReference
         ) {
             @Override
-            protected void populateViewHolder(final BlogViewHolder viewHolder, Blog model, int position) {
+            protected void populateViewHolder(final BlogViewHolder viewHolder, final Blog model, final int position) {
 
                 final String post_key = getRef(position).getKey();
 
-                viewHolder.setTitle(model.getTitle());
-                viewHolder.setDesc(model.getDesc());
-                viewHolder.setImage(getContext(), model.getImage());
-                databaseReference.child(post_key).addValueEventListener(new ValueEventListener() {
+                databaseFriends.child(mAuth.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        viewHolder.setShowComments(getContext(),dataSnapshot.hasChild("comment"),post_key);
+                        if (dataSnapshot.hasChild(model.getUserId()) || (model.getUserId().equals(mAuth.getCurrentUser().getUid()))){
+                            viewHolder.setVisibility();
+                            viewHolder.setTitle(model.getTitle());
+                            viewHolder.setDesc(model.getDesc());
+                            viewHolder.setImage(getContext(), model.getImage());
+                            databaseReference.child(post_key).addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    viewHolder.setShowComments(getContext(),dataSnapshot.hasChild("comment"),post_key);
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+
+                            databaseusers.child(model.getUserId()).addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                                    String name = dataSnapshot.child("name").getValue().toString();
+                                    String image = dataSnapshot.child("thumb_image").getValue().toString();
+
+                                    viewHolder.setUserImage(getContext(),image);
+                                    viewHolder.setUsername(name);
+                                    viewHolder.setSendComments(getContext(),post_key);
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+
+                            viewHolder.showDelete(model.getUserId(),post_key);
+                        }else {
+                            viewHolder.hide();
+                        }
                     }
 
                     @Override
@@ -110,25 +152,11 @@ public class HomeFragment extends Fragment {
 
                     }
                 });
-                databaseusers.child(model.getUserId()).addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
 
-                        String name = dataSnapshot.child("name").getValue().toString();
-                        String image = dataSnapshot.child("thumb_image").getValue().toString();
 
-                        viewHolder.setUserImage(getContext(),image);
-                        viewHolder.setUsername(name);
-                        viewHolder.setSendComments(getContext(),post_key);
-                    }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
 
-                    }
-                });
 
-                viewHolder.showDelete(model.getUserId(),post_key);
 
             }
         };
@@ -264,6 +292,23 @@ public class HomeFragment extends Fragment {
                     }
                 });
             }
+        }
+
+        public void setVisibility(){
+
+            CardView mCardView = (CardView) view.findViewById(R.id.cardView);
+            mCardView.setVisibility(View.VISIBLE);
+        }
+
+        public void hide() {
+
+            // Gets linearlayout
+            CardView layout = (CardView) view.findViewById(R.id.cardView);
+            // Gets the layout params that will allow you to resize the layout
+            ViewGroup.LayoutParams params = layout.getLayoutParams();
+            // Changes the height and width to the specified *pixels*
+            params.height = 0;
+            layout.setLayoutParams(params);
         }
     }
 }

@@ -40,6 +40,8 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
+import java.util.Arrays;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 
@@ -233,6 +235,11 @@ public class ChatFrament extends Fragment implements GoogleApiClient.ConnectionC
                 //viewHolder.setThumb_image(model.getThumb_image(),getApplicationContext());
 
                 final String user_id = getRef(position).getKey();
+                final String current = mAuth.getCurrentUser().getUid();
+                final String chatref = current+user_id;
+                char[] chars = chatref.toCharArray();
+                Arrays.sort(chars);
+                final String chatref1 = new String(chars);
                 mUserReference.child(user_id).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -285,7 +292,13 @@ public class ChatFrament extends Fragment implements GoogleApiClient.ConnectionC
                                     startActivity(profileIntent);
                                 }else if (i == 1){
 
-                                    Intent chatIntent = new Intent(getContext(), Chat.class);
+                                    Intent chatIntent = new Intent(getContext(), ChatBlog.class);
+
+                                    chatIntent.putExtra(ExtraIntent.EXTRA_CURRENT_USER_ID, current);
+                                    chatIntent.putExtra(ExtraIntent.EXTRA_RECIPIENT_ID, user_id);
+                                    chatIntent.putExtra(ExtraIntent.EXTRA_CHAT_REF,chatref1);
+
+
                                     chatIntent.putExtra("user_id", user_id);
                                     //Toast.makeText(getContext(),userName,Toast.LENGTH_LONG).show();
                                     chatIntent.putExtra("name", nam);

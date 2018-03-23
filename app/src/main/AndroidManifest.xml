@@ -81,7 +81,8 @@
             android:name=".Chat"
             android:parentActivityName=".MainActivity" />
         <activity android:name=".Post" />
-        <activity android:name=".SearchUser"></activity>
+        <activity android:name=".SearchUser" />
+        <activity android:name=".ChatBlog"></activity>
     </application>
 
 </manifest>
