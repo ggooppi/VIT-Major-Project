@@ -181,6 +181,8 @@ public class Login extends AppCompatActivity {
                             // Sign in failed, display a message and update the UI
                             progressDialog.dismiss();
                             makeText(Login.this, "Sign In Problem", LENGTH_LONG).show();
+                            phNo.setEnabled(true);
+                            click.setEnabled(true);
                         }
                     }
                 });

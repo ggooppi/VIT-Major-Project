@@ -63,10 +63,12 @@ public class MainActivity extends AppCompatActivity {
         chatFrament = new ChatFrament();
         settingFragment = new SettingFragment();
 
-        changeFragment(position);
-
         mBottomNavigationView = (BottomNavigationView) findViewById(R.id.main_nav);
         mFrameLayout = (FrameLayout) findViewById(R.id.main_frame);
+
+        if (mAuth.getCurrentUser()!=null){
+            changeFragment(position);
+        }
 
         mBottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override

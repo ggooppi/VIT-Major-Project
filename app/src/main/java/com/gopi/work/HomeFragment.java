@@ -280,8 +280,9 @@ public class HomeFragment extends Fragment {
 
         public void showDelete(String userId, final String post_key) {
 
+            ImageView delete = (ImageView) view.findViewById(R.id.deleteBlog);
+
             if(FirebaseAuth.getInstance().getCurrentUser().getUid().equals(userId)){
-                ImageView delete = (ImageView) view.findViewById(R.id.deleteBlog);
                 delete.setVisibility(View.VISIBLE);
 
                 delete.setOnClickListener(new View.OnClickListener() {
@@ -291,6 +292,8 @@ public class HomeFragment extends Fragment {
                         mDatabaseReference.child(post_key).removeValue();
                     }
                 });
+            }else {
+                delete.setVisibility(View.INVISIBLE);
             }
         }
 
