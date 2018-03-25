@@ -5,13 +5,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.gopi.work.ChatBlog">
+
+    <include
+        android:id="@+id/chatBar"
+        layout="@layout/app_bar" />
+
     <android.support.v7.widget.RecyclerView
+        android:id="@+id/chatList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:id="@+id/chatList" />
+        android:layout_above="@+id/divider"
+        android:layout_below="@+id/chatBar"
+        android:layout_alignParentStart="true" />
 
     <View
         android:id="@+id/divider"
@@ -20,37 +25,54 @@
         android:layout_gravity="bottom"
         android:background="@color/divider"
         android:layout_above="@+id/senderContainer"/>
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/senderContainer"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:layout_height="50dp"
         android:layout_alignParentBottom="true"
-        android:paddingBottom="4dp"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:paddingTop="8dp">
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="3dp"
+        android:background="@color/white"
+        android:orientation="horizontal"
+        android:weightSum="10"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageButton
+            android:id="@+id/uAttach"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:alpha=".5"
+            android:background="@color/white"
+            android:padding="10dp"
+            app:srcCompat="@mipmap/ic_attachment_black_24dp" />
 
         <EditText
-            android:id="@+id/edit_text_message"
-            android:layout_marginLeft="5dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Type your message"
-            android:gravity="top"
-            android:layout_toLeftOf="@+id/btn_send_message"
-            android:layout_toStartOf="@+id/btn_send_message"
-            android:typeface="normal" />
+            android:id="@+id/uMessage"
+            android:layout_width="296dp"
+            android:layout_height="match_parent"
+            android:layout_weight="8"
+            android:alpha="0.5"
+            android:background="@color/white"
+            android:hint="Type Your Message"
+            android:inputType="textCapSentences|textAutoCorrect|textEmailAddress|textPersonName|textWebEmailAddress"
+            android:paddingBottom="12dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="16dp" />
 
-        <Button
-            android:id="@+id/btn_send_message"
-            android:textColor="#FFFFFF"
-            android:layout_width="72dp"
-            android:layout_height="40dp"
-            android:text="Send"
-            android:background="@color/colorPrimary"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" />
-    </RelativeLayout>
+        <ImageButton
+            android:id="@+id/uSend"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:alpha="0.5"
+            android:background="@color/white"
+            android:padding="10dp"
+            app:srcCompat="@mipmap/ic_send_black_24dp" />
+    </LinearLayout>
 
 </RelativeLayout>

@@ -1,11 +1,16 @@
 package com.gopi.work;
 
+import android.content.Context;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -13,12 +18,17 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ChatBlog extends AppCompatActivity {
 
@@ -26,14 +36,25 @@ public class ChatBlog extends AppCompatActivity {
 
     @BindView(R.id.chatList)
     RecyclerView mChatRecyclerView;
-    @BindView(R.id.edit_text_message)
+    @BindView(R.id.uMessage)
     EditText mUserMessageChatText;
+
+    private Toolbar mChatToolbar;
+
+    private TextView displayName;
+    private TextView lastSceen;
+
+    private CircleImageView userProfile;
+
+    private String mChatUser;
+    String mChatUserName;
 
 
     private String mRecipientId;
     private String mCurrentUserId;
     private MessageChatAdapter messageChatAdapter;
     private DatabaseReference messageChatDatabase;
+    private DatabaseReference mRootRef;
     private FirebaseAuth mAuth;
     private ChildEventListener messageChatListener;
 
@@ -42,11 +63,78 @@ public class ChatBlog extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_blog);
 
+        mChatToolbar = (Toolbar) findViewById(R.id.chatBar);
+        setSupportActionBar(mChatToolbar);
+
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayShowCustomEnabled(true);
+
+        mChatUser = getIntent().getStringExtra("user_id");
+        mChatUserName = getIntent().getStringExtra("name");
+
+        LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View actionBarView = inflater.inflate(R.layout.chat_custom_bar, null);
+
+        actionBar.setCustomView(actionBarView);
+
+        displayName = (TextView) findViewById(R.id.uTitlename);
+        lastSceen = (TextView) findViewById(R.id.userLastseen);
+        userProfile = (CircleImageView) findViewById(R.id.user_image);
+
+        mRootRef = FirebaseDatabase.getInstance().getReference();
+
         bindButterKnife();
         setDatabaseInstance();
         setUsersId();
         setChatRecyclerView();
         mAuth = FirebaseAuth.getInstance();
+
+        mRootRef.child("User").child(mChatUser).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                displayName.setText(dataSnapshot.child("name").getValue().toString());
+
+                String online = dataSnapshot.child("online").getValue().toString();
+                final String image = dataSnapshot.child("thumb_image").getValue().toString();
+
+
+                if (online.equals("true")) {
+
+                    lastSceen.setText("Online");
+                } else if (online.equals("Running Background")) {
+
+                    lastSceen.setText("Running Background");
+                }else {
+
+                    GetTimeAgo getTime = new GetTimeAgo();
+
+                    lastSceen.setText(getTime.getTimeAgo(Long.parseLong(online), getApplicationContext()));
+                }
+
+                Picasso.with(getApplicationContext()).load(image).networkPolicy(NetworkPolicy.OFFLINE)
+                        .placeholder(R.drawable.if_user_925901).into(userProfile, new Callback() {
+                    @Override
+                    public void onSuccess() {
+
+                    }
+
+                    @Override
+                    public void onError() {
+
+                        Picasso.with(getApplicationContext()).load(image).placeholder(R.drawable.if_user_925901).into(userProfile);
+
+                    }
+                });
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void setChatRecyclerView() {
@@ -123,7 +211,7 @@ public class ChatBlog extends AppCompatActivity {
         messageChatAdapter.cleanUp();
     }
 
-    @OnClick(R.id.btn_send_message)
+    @OnClick(R.id.uSend)
     public void btnSendMsgListener(View sendButton){
 
         String senderMessage = mUserMessageChatText.getText().toString().trim();
