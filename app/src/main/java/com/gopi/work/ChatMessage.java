@@ -10,21 +10,31 @@ public class ChatMessage {
     private String message;
     private String sender;
     private String recipient;
+    private String type;
 
     private int mRecipientOrSenderStatus;
 
     public ChatMessage() {
     }
 
-    public ChatMessage(String message, String sender, String recipient) {
+    public ChatMessage(String message, String sender, String recipient, String type) {
         this.message = message;
         this.recipient = recipient;
         this.sender = sender;
+        this.type = type;
     }
 
 
     public void setRecipientOrSenderStatus(int recipientOrSenderStatus) {
         this.mRecipientOrSenderStatus = recipientOrSenderStatus;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
 

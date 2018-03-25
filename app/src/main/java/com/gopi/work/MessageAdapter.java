@@ -114,7 +114,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             super(v);
 
             messageText = (TextView) v.findViewById(R.id.messageTextLayout);
-            messageImage = (ImageView) v.findViewById(R.id.message_image_layout);
+           // messageImage = (ImageView) v.findViewById(R.id.message_image_layout);
         }
     }
 }
