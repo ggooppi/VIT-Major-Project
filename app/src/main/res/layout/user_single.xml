@@ -37,14 +37,24 @@
         android:textSize="16sp" />
 
     <ImageButton
+        android:id="@+id/chat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/user_nam"
+        android:layout_marginEnd="34dp"
+        android:layout_toStartOf="@+id/locate"
+        android:background="@android:color/transparent"
+        android:src="@mipmap/ic_chat_black_24dp" />
+
+    <ImageButton
         android:id="@+id/locate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:layout_marginEnd="15dp"
+        android:layout_alignTop="@+id/chat"
+        android:layout_marginEnd="30dp"
         android:background="@android:color/transparent"
-        android:visibility="gone"
+        android:visibility="visible"
         app:srcCompat="@mipmap/ic_map_black_24dp" />
 
     <TextView

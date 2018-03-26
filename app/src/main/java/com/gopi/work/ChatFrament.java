@@ -277,41 +277,26 @@ public class ChatFrament extends Fragment implements GoogleApiClient.ConnectionC
                 viewHolder.view.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        Intent profileIntent = new Intent(getContext(), Profile.class);
+                        profileIntent.putExtra("user_id", user_id);
+                        startActivity(profileIntent);
+                    }
+                });
 
-                        CharSequence options[] = new CharSequence[]{"Open Profile", "Send Message"};
+                viewHolder.view.findViewById(R.id.chat).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent chatIntent = new Intent(getContext(), ChatBlog.class);
 
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                        builder.setTitle("Select");
-                        builder.setItems(options, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-
-                                if (i == 0){
-                                    Intent profileIntent = new Intent(getContext(), Profile.class);
-                                    profileIntent.putExtra("user_id", user_id);
-                                    startActivity(profileIntent);
-                                }else if (i == 1){
-
-                                    Intent chatIntent = new Intent(getContext(), ChatBlog.class);
-
-                                    chatIntent.putExtra(ExtraIntent.EXTRA_CURRENT_USER_ID, current);
-                                    chatIntent.putExtra(ExtraIntent.EXTRA_RECIPIENT_ID, user_id);
-                                    chatIntent.putExtra(ExtraIntent.EXTRA_CHAT_REF,chatref1);
+                        chatIntent.putExtra(ExtraIntent.EXTRA_CURRENT_USER_ID, current);
+                        chatIntent.putExtra(ExtraIntent.EXTRA_RECIPIENT_ID, user_id);
+                        chatIntent.putExtra(ExtraIntent.EXTRA_CHAT_REF,chatref1);
 
 
-                                    chatIntent.putExtra("user_id", user_id);
-                                    //Toast.makeText(getContext(),userName,Toast.LENGTH_LONG).show();
-                                    chatIntent.putExtra("name", nam);
-                                    startActivity(chatIntent);
-
-
-                                }
-
-                            }
-                        });
-
-                        builder.show();
-
+                        chatIntent.putExtra("user_id", user_id);
+                        //Toast.makeText(getContext(),userName,Toast.LENGTH_LONG).show();
+                        chatIntent.putExtra("name", nam);
+                        startActivity(chatIntent);
                     }
                 });
 

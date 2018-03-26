@@ -6,15 +6,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/recipientImage"
-        android:layout_width="217dp"
-        android:layout_height="217dp"
-        android:layout_marginEnd="127dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/if_user_925901" />
+        <ImageView
+            android:id="@+id/recipientImage"
+            android:layout_width="217dp"
+            android:layout_height="217dp"
+            android:layout_marginEnd="127dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="16dp"
+            android:padding="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/if_user_925901" />
 </android.support.constraint.ConstraintLayout>
