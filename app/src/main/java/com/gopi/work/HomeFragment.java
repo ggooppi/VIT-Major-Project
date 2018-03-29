@@ -1,9 +1,11 @@
 package com.gopi.work;
 
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -11,12 +13,14 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
@@ -24,13 +28,30 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+import static android.content.ContentValues.TAG;
 
 
 /**
@@ -107,10 +128,10 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if (dataSnapshot.hasChild(model.getUserId()) || (model.getUserId().equals(mAuth.getCurrentUser().getUid()))){
-                            viewHolder.setVisibility();
                             viewHolder.setTitle(model.getTitle());
                             viewHolder.setDesc(model.getDesc());
                             viewHolder.setImage(getContext(), model.getImage());
+                            viewHolder.setVisibility();
                             databaseReference.child(post_key).addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -167,6 +188,8 @@ public class HomeFragment extends Fragment {
 
     public static class BlogViewHolder extends RecyclerView.ViewHolder{
 
+        private ProgressDialog prog;
+
         View view;
 
         public BlogViewHolder(View itemView) {
@@ -190,6 +213,10 @@ public class HomeFragment extends Fragment {
 
         public void setImage(final Context ctx, final String img){
 
+            prog = new ProgressDialog(ctx);
+
+            final ImageView downloadImage = (ImageView) view.findViewById(R.id.downloadBlog);
+
             final ImageView post_img = (ImageView) view.findViewById(R.id.post_Img);
             Picasso.with(ctx). load(img).networkPolicy(NetworkPolicy.OFFLINE).into(post_img, new Callback() {
                         @Override
@@ -205,6 +232,87 @@ public class HomeFragment extends Fragment {
                         }
                     }
             );
+
+            downloadImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    prog.setMessage("Downloading");
+                    prog.setCanceledOnTouchOutside(false);
+                    prog.show();
+                    Retrofit.Builder builder = new Retrofit.Builder().baseUrl("https://www.google.co.in/");
+                    Retrofit retrofit = builder.build();
+                    ImageDownloadClient imageDownloadClient =retrofit.create(ImageDownloadClient.class);
+                    Call<ResponseBody> call = imageDownloadClient.downloadFile(img);
+                    call.enqueue(new retrofit2.Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                            Boolean status = writeResponseBodyToDisk(ctx,response.body());
+                            prog.dismiss();
+                            Toast.makeText(ctx,"Download" + status,Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            prog.dismiss();
+                            Toast.makeText(ctx,"Download Failed",Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                }
+            });
+        }
+
+        private Boolean writeResponseBodyToDisk(Context ctx, ResponseBody body) {
+
+            try {
+                final String currentDate = DateFormat.getDateInstance().format(new Date());
+                // todo change the file location/name according to your needs
+                File blogImageFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+ File.separator + "Tan Tana Tan"+ currentDate+".png");
+
+                InputStream inputStream = null;
+                OutputStream outputStream = null;
+
+                try {
+                    byte[] fileReader = new byte[4096];
+
+                    long fileSize = body.contentLength();
+                    long fileSizeDownloaded = 0;
+
+                    inputStream = body.byteStream();
+                    outputStream = new FileOutputStream(blogImageFile);
+
+                    while (true) {
+                        int read = inputStream.read(fileReader);
+
+                        if (read == -1) {
+                            break;
+                        }
+
+                        outputStream.write(fileReader, 0, read);
+
+                        fileSizeDownloaded += read;
+
+                        Log.d(TAG, "file download: " + fileSizeDownloaded + " of " + fileSize);
+                    }
+
+                    outputStream.flush();
+
+                    return true;
+                } catch (IOException e) {
+                    return false;
+                } finally {
+                    if (inputStream != null) {
+                        inputStream.close();
+                    }
+
+                    if (outputStream != null) {
+                        outputStream.close();
+                    }
+                }
+            } catch (IOException e) {
+                return false;
+            }
         }
 
         public void setUsername(String username){
@@ -293,7 +401,7 @@ public class HomeFragment extends Fragment {
                     }
                 });
             }else {
-                delete.setVisibility(View.INVISIBLE);
+                delete.setVisibility(View.GONE);
             }
         }
 
