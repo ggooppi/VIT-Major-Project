@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.MultiAutoCompleteTextView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -127,7 +128,7 @@ public class HomeFragment extends Fragment {
                 databaseFriends.child(mAuth.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.hasChild(model.getUserId()) || (model.getUserId().equals(mAuth.getCurrentUser().getUid()))){
+                        if (dataSnapshot.hasChild(model.getUserId()) /*|| (model.getUserId().equals(mAuth.getCurrentUser().getUid()))*/){
                             viewHolder.setTitle(model.getTitle());
                             viewHolder.setDesc(model.getDesc());
                             viewHolder.setImage(getContext(), model.getImage());
@@ -407,6 +408,9 @@ public class HomeFragment extends Fragment {
 
         public void setVisibility(){
 
+            RelativeLayout cardlayout = (RelativeLayout) view.findViewById(R.id.layoutForCardView);
+            cardlayout.setVisibility(View.VISIBLE);
+
             CardView mCardView = (CardView) view.findViewById(R.id.cardView);
             mCardView.setVisibility(View.VISIBLE);
         }
@@ -414,12 +418,23 @@ public class HomeFragment extends Fragment {
         public void hide() {
 
             // Gets linearlayout
+            RelativeLayout cardlayout = (RelativeLayout) view.findViewById(R.id.layoutForCardView);
+            cardlayout.setVisibility(View.GONE);
+            setMargins(view,0,0,0,0);
             CardView layout = (CardView) view.findViewById(R.id.cardView);
             // Gets the layout params that will allow you to resize the layout
             ViewGroup.LayoutParams params = layout.getLayoutParams();
             // Changes the height and width to the specified *pixels*
             params.height = 0;
             layout.setLayoutParams(params);
+        }
+
+        public static void setMargins (View v, int l, int t, int r, int b) {
+            if (v.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+                ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+                p.setMargins(l, t, r, b);
+                v.requestLayout();
+            }
         }
     }
 }
