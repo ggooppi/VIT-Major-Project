@@ -128,7 +128,7 @@ public class HomeFragment extends Fragment {
                 databaseFriends.child(mAuth.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.hasChild(model.getUserId()) /*|| (model.getUserId().equals(mAuth.getCurrentUser().getUid()))*/){
+                        if (dataSnapshot.hasChild(model.getUserId()) || (model.getUserId().equals(mAuth.getCurrentUser().getUid()))){
                             viewHolder.setTitle(model.getTitle());
                             viewHolder.setDesc(model.getDesc());
                             viewHolder.setImage(getContext(), model.getImage());

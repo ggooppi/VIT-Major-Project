@@ -273,6 +273,7 @@ public class ChatFrament extends Fragment implements GoogleApiClient.ConnectionC
                 });
 
                 viewHolder.view.findViewById(R.id.locate).setVisibility(View.VISIBLE);
+                viewHolder.view.findViewById(R.id.chat).setVisibility(View.VISIBLE);
 
                 viewHolder.view.setOnClickListener(new View.OnClickListener() {
                     @Override
