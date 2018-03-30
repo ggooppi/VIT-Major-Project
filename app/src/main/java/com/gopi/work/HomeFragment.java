@@ -266,9 +266,9 @@ public class HomeFragment extends Fragment {
         private Boolean writeResponseBodyToDisk(Context ctx, ResponseBody body) {
 
             try {
-                final String currentDate = DateFormat.getDateInstance().format(new Date());
+                final String currentDate = DateFormat.getDateTimeInstance().format(new Date());
                 // todo change the file location/name according to your needs
-                File blogImageFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+ File.separator + "Tan Tana Tan"+ currentDate+".png");
+                File blogImageFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+ File.separator + "Tan Tana Tan_"+currentDate+".png");
 
                 InputStream inputStream = null;
                 OutputStream outputStream = null;
