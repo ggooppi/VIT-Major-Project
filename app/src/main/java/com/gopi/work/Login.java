@@ -15,6 +15,7 @@ import android.widget.Button;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseException;
+import com.google.firebase.FirebaseTooManyRequestsException;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
@@ -74,7 +75,7 @@ public class Login extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                String ph = phNo.getText().toString().trim();
+                String ph = "+91"+phNo.getText().toString().trim();
 
                 if(buttonType == 0) {
 
@@ -132,7 +133,21 @@ public class Login extends AppCompatActivity {
             @Override
             public void onVerificationFailed(FirebaseException e) {
 
-                makeText(Login.this, "Error in verification", LENGTH_LONG).show();
+//                makeText(Login.this, "Error in verification", LENGTH_LONG).show();
+
+                Log.w("Login", "onVerificationFailed", e);
+
+                if (e instanceof FirebaseAuthInvalidCredentialsException) {
+
+                    makeText(Login.this, "Invalid request", LENGTH_LONG).show();
+                    // Invalid request
+                    // ...
+                } else if (e instanceof FirebaseTooManyRequestsException) {
+                    makeText(Login.this, "The SMS quota for the project has been exceeded", LENGTH_LONG).show();
+                    // The SMS quota for the project has been exceeded
+                    // ...
+                }
+
 
             }
 

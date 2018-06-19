@@ -35,7 +35,8 @@ import java.util.Map;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class HomeFragment extends Fragment {
+public class
+HomeFragment extends Fragment {
 
     private RecyclerView mBloglist;
     private LinearLayoutManager mLayoutManager;
