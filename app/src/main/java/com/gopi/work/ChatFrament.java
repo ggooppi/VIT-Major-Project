@@ -40,6 +40,8 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
+import java.util.Arrays;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 
@@ -233,6 +235,11 @@ public class ChatFrament extends Fragment implements GoogleApiClient.ConnectionC
                 //viewHolder.setThumb_image(model.getThumb_image(),getApplicationContext());
 
                 final String user_id = getRef(position).getKey();
+                final String current = mAuth.getCurrentUser().getUid();
+                final String chatref = current+user_id;
+                char[] chars = chatref.toCharArray();
+                Arrays.sort(chars);
+                final String chatref1 = new String(chars);
                 mUserReference.child(user_id).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -266,39 +273,31 @@ public class ChatFrament extends Fragment implements GoogleApiClient.ConnectionC
                 });
 
                 viewHolder.view.findViewById(R.id.locate).setVisibility(View.VISIBLE);
+                viewHolder.view.findViewById(R.id.chat).setVisibility(View.VISIBLE);
 
                 viewHolder.view.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        Intent profileIntent = new Intent(getContext(), Profile.class);
+                        profileIntent.putExtra("user_id", user_id);
+                        startActivity(profileIntent);
+                    }
+                });
 
-                        CharSequence options[] = new CharSequence[]{"Open Profile", "Send Message"};
+                viewHolder.view.findViewById(R.id.chat).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent chatIntent = new Intent(getContext(), ChatBlog.class);
 
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                        builder.setTitle("Select");
-                        builder.setItems(options, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-
-                                if (i == 0){
-                                    Intent profileIntent = new Intent(getContext(), Profile.class);
-                                    profileIntent.putExtra("user_id", user_id);
-                                    startActivity(profileIntent);
-                                }else if (i == 1){
-
-                                    Intent chatIntent = new Intent(getContext(), Chat.class);
-                                    chatIntent.putExtra("user_id", user_id);
-                                    //Toast.makeText(getContext(),userName,Toast.LENGTH_LONG).show();
-                                    chatIntent.putExtra("name", nam);
-                                    startActivity(chatIntent);
+                        chatIntent.putExtra(ExtraIntent.EXTRA_CURRENT_USER_ID, current);
+                        chatIntent.putExtra(ExtraIntent.EXTRA_RECIPIENT_ID, user_id);
+                        chatIntent.putExtra(ExtraIntent.EXTRA_CHAT_REF,chatref1);
 
 
-                                }
-
-                            }
-                        });
-
-                        builder.show();
-
+                        chatIntent.putExtra("user_id", user_id);
+                        //Toast.makeText(getContext(),userName,Toast.LENGTH_LONG).show();
+                        chatIntent.putExtra("name", nam);
+                        startActivity(chatIntent);
                     }
                 });
 

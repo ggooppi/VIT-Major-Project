@@ -1,21 +1,27 @@
 package com.gopi.work;
 
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.MultiAutoCompleteTextView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,13 +29,30 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+import static android.content.ContentValues.TAG;
 
 
 /**
@@ -43,6 +66,9 @@ HomeFragment extends Fragment {
 
     private DatabaseReference databaseReference;
     private DatabaseReference databaseusers;
+    private DatabaseReference databaseFriends;
+
+    private FirebaseAuth mAuth;
 
     private FloatingActionButton floatingActionButton;
 
@@ -64,10 +90,13 @@ HomeFragment extends Fragment {
         mLayoutManager = new LinearLayoutManager(getContext());
         mLayoutManager.setReverseLayout(true);
         mLayoutManager.setStackFromEnd(true);
+        mAuth = FirebaseAuth.getInstance();
         databaseReference = FirebaseDatabase.getInstance().getReference().child("Blog");
         databaseReference.keepSynced(true);
         databaseusers = FirebaseDatabase.getInstance().getReference().child("User");
         databaseusers.keepSynced(true);
+        databaseFriends = FirebaseDatabase.getInstance().getReference().child("Friends");
+        databaseFriends.keepSynced(true);
         mBloglist.setLayoutManager(new LinearLayoutManager(getContext()));
 
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
@@ -93,17 +122,52 @@ HomeFragment extends Fragment {
                 databaseReference
         ) {
             @Override
-            protected void populateViewHolder(final BlogViewHolder viewHolder, Blog model, int position) {
+            protected void populateViewHolder(final BlogViewHolder viewHolder, final Blog model, final int position) {
 
                 final String post_key = getRef(position).getKey();
 
-                viewHolder.setTitle(model.getTitle());
-                viewHolder.setDesc(model.getDesc());
-                viewHolder.setImage(getContext(), model.getImage());
-                databaseReference.child(post_key).addValueEventListener(new ValueEventListener() {
+                databaseFriends.child(mAuth.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        viewHolder.setShowComments(getContext(),dataSnapshot.hasChild("comment"),post_key);
+                        if (dataSnapshot.hasChild(model.getUserId()) || (model.getUserId().equals(mAuth.getCurrentUser().getUid()))){
+                            viewHolder.setTitle(model.getTitle());
+                            viewHolder.setDesc(model.getDesc());
+                            viewHolder.setImage(getContext(), model.getImage());
+                            viewHolder.setVisibility();
+                            databaseReference.child(post_key).addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    viewHolder.setShowComments(getContext(),dataSnapshot.hasChild("comment"),post_key);
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+
+                            databaseusers.child(model.getUserId()).addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                                    String name = dataSnapshot.child("name").getValue().toString();
+                                    String image = dataSnapshot.child("thumb_image").getValue().toString();
+
+                                    viewHolder.setUserImage(getContext(),image);
+                                    viewHolder.setUsername(name);
+                                    viewHolder.setSendComments(getContext(),post_key);
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+
+                            viewHolder.showDelete(model.getUserId(),post_key);
+                        }else {
+                            viewHolder.hide();
+                        }
                     }
 
                     @Override
@@ -111,25 +175,11 @@ HomeFragment extends Fragment {
 
                     }
                 });
-                databaseusers.child(model.getUserId()).addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
 
-                        String name = dataSnapshot.child("name").getValue().toString();
-                        String image = dataSnapshot.child("thumb_image").getValue().toString();
 
-                        viewHolder.setUserImage(getContext(),image);
-                        viewHolder.setUsername(name);
-                        viewHolder.setSendComments(getContext(),post_key);
-                    }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
 
-                    }
-                });
 
-                viewHolder.showDelete(model.getUserId(),post_key);
 
             }
         };
@@ -139,6 +189,8 @@ HomeFragment extends Fragment {
     }
 
     public static class BlogViewHolder extends RecyclerView.ViewHolder{
+
+        private ProgressDialog prog;
 
         View view;
 
@@ -163,6 +215,10 @@ HomeFragment extends Fragment {
 
         public void setImage(final Context ctx, final String img){
 
+            prog = new ProgressDialog(ctx);
+
+            final ImageView downloadImage = (ImageView) view.findViewById(R.id.downloadBlog);
+
             final ImageView post_img = (ImageView) view.findViewById(R.id.post_Img);
             Picasso.with(ctx). load(img).networkPolicy(NetworkPolicy.OFFLINE).into(post_img, new Callback() {
                         @Override
@@ -178,6 +234,87 @@ HomeFragment extends Fragment {
                         }
                     }
             );
+
+            downloadImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    prog.setMessage("Downloading");
+                    prog.setCanceledOnTouchOutside(false);
+                    prog.show();
+                    Retrofit.Builder builder = new Retrofit.Builder().baseUrl("https://www.google.co.in/");
+                    Retrofit retrofit = builder.build();
+                    ImageDownloadClient imageDownloadClient =retrofit.create(ImageDownloadClient.class);
+                    Call<ResponseBody> call = imageDownloadClient.downloadFile(img);
+                    call.enqueue(new retrofit2.Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                            Boolean status = writeResponseBodyToDisk(ctx,response.body());
+                            prog.dismiss();
+                            Toast.makeText(ctx,"Download" + status,Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            prog.dismiss();
+                            Toast.makeText(ctx,"Download Failed",Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                }
+            });
+        }
+
+        private Boolean writeResponseBodyToDisk(Context ctx, ResponseBody body) {
+
+            try {
+                final String currentDate = DateFormat.getDateTimeInstance().format(new Date());
+                // todo change the file location/name according to your needs
+                File blogImageFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+ File.separator + "Tan Tana Tan_"+currentDate+".png");
+
+                InputStream inputStream = null;
+                OutputStream outputStream = null;
+
+                try {
+                    byte[] fileReader = new byte[4096];
+
+                    long fileSize = body.contentLength();
+                    long fileSizeDownloaded = 0;
+
+                    inputStream = body.byteStream();
+                    outputStream = new FileOutputStream(blogImageFile);
+
+                    while (true) {
+                        int read = inputStream.read(fileReader);
+
+                        if (read == -1) {
+                            break;
+                        }
+
+                        outputStream.write(fileReader, 0, read);
+
+                        fileSizeDownloaded += read;
+
+                        Log.d(TAG, "file download: " + fileSizeDownloaded + " of " + fileSize);
+                    }
+
+                    outputStream.flush();
+
+                    return true;
+                } catch (IOException e) {
+                    return false;
+                } finally {
+                    if (inputStream != null) {
+                        inputStream.close();
+                    }
+
+                    if (outputStream != null) {
+                        outputStream.close();
+                    }
+                }
+            } catch (IOException e) {
+                return false;
+            }
         }
 
         public void setUsername(String username){
@@ -253,8 +390,9 @@ HomeFragment extends Fragment {
 
         public void showDelete(String userId, final String post_key) {
 
+            ImageView delete = (ImageView) view.findViewById(R.id.deleteBlog);
+
             if(FirebaseAuth.getInstance().getCurrentUser().getUid().equals(userId)){
-                ImageView delete = (ImageView) view.findViewById(R.id.deleteBlog);
                 delete.setVisibility(View.VISIBLE);
 
                 delete.setOnClickListener(new View.OnClickListener() {
@@ -264,6 +402,39 @@ HomeFragment extends Fragment {
                         mDatabaseReference.child(post_key).removeValue();
                     }
                 });
+            }else {
+                delete.setVisibility(View.GONE);
+            }
+        }
+
+        public void setVisibility(){
+
+            RelativeLayout cardlayout = (RelativeLayout) view.findViewById(R.id.layoutForCardView);
+            cardlayout.setVisibility(View.VISIBLE);
+
+            CardView mCardView = (CardView) view.findViewById(R.id.cardView);
+            mCardView.setVisibility(View.VISIBLE);
+        }
+
+        public void hide() {
+
+            // Gets linearlayout
+            RelativeLayout cardlayout = (RelativeLayout) view.findViewById(R.id.layoutForCardView);
+            cardlayout.setVisibility(View.GONE);
+            setMargins(view,0,0,0,0);
+            CardView layout = (CardView) view.findViewById(R.id.cardView);
+            // Gets the layout params that will allow you to resize the layout
+            ViewGroup.LayoutParams params = layout.getLayoutParams();
+            // Changes the height and width to the specified *pixels*
+            params.height = 0;
+            layout.setLayoutParams(params);
+        }
+
+        public static void setMargins (View v, int l, int t, int r, int b) {
+            if (v.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+                ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+                p.setMargins(l, t, r, b);
+                v.requestLayout();
             }
         }
     }

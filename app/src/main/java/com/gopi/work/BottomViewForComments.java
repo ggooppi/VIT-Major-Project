@@ -76,6 +76,7 @@ public class BottomViewForComments {
                     commentMap.put("commentText", comments);
 
                     databaseReference.child(blogKey).child("comment").push().setValue(commentMap);
+                    mComments.setText("");
                 }
             }
         });

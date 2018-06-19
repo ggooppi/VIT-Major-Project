@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/messageSingleLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
     <TextView
-        android:id="@+id/messageTextLayout"
+        android:id="@+id/messageReceiveTextLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="2dp"
@@ -18,13 +19,18 @@
         android:textColor="#727272"
         android:textSize="18sp"
         android:textStyle="bold"
+        android:visibility="gone"
         tools:text="Hi. How are you?" />
 
     <ImageView
-        android:id="@+id/message_image_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="visible"
-        android:layout_below="@+id/messageTextLayout"/>
+        android:id="@+id/recipientImage"
+        android:layout_width="217dp"
+        android:layout_height="217dp"
+        android:layout_marginEnd="127dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        app:srcCompat="@drawable/if_user_925901" />
 
 </RelativeLayout>
